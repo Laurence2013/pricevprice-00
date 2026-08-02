@@ -22,17 +22,10 @@ app.post('/api/skus', (req, res) => {
 
   defer(() => from(db.collection('skus').add(skuData))).pipe(
 		tap((docRef) => console.log(`Saving document ${docRef.id} to Emulator`)),
-		map((docRef) => ({
-			status: 201,
-			body: {
-				success: true,
-				id: docRef.id,
-				message: `Document ${docRef.id} created.`
-			}})),
-		catchError((error) => of({
-			status: 500,
-			body: { success: false, error: error.message }
-		}))).subscribe(({ status, body }) => res.status(status).json(body));
+		map((docRef) => ({status: 201,
+			body: {success: true,id: docRef.id,message: `Document ${docRef.id} created.`}})),
+		catchError((error) => of({status: 500,body: { success: false, error: error.message }}))
+	).subscribe(({ status, body }) => res.status(status).json(body));
 });
 app.get('/api/skus/:id', (req, res) => {
   const { id } = req.params;
@@ -47,13 +40,20 @@ app.get('/api/skus/:id', (req, res) => {
 		catchError((error) => of({status: 500, body: { success: false, error: error.message }}))
   ).subscribe(({ status, body }) => res.status(status).json(body));
 });
-// UPDATE (PATCH /api/skus/:id - RxJS)
 app.patch('/api/skus/:id', (req, res) => {
   const { id } = req.params;
   const updateData = {...req.body, updatedAt: new Date().toISOString()};
 
   defer(() => from(db.collection('skus').doc(id).update(updateData))).pipe(
 		map(() => ({status: 200, body: { success: true, message: `Document ${id} updated.` }})),
+		catchError((error) => of({status: 500,body: { success: false, error: error.message }}))
+	).subscribe(({ status, body }) => res.status(status).json(body));
+});
+app.delete('/api/skus/:id', (req, res) => {
+  const { id } = req.params;
+
+  defer(() => from(db.collection('skus').doc(id).delete())).pipe(
+		map(() => ({status: 200,body: { success: true, message: `Document ${id} deleted.` }})),
 		catchError((error) => of({status: 500,body: { success: false, error: error.message }}))
 	).subscribe(({ status, body }) => res.status(status).json(body));
 });
