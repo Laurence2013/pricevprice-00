@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
-    "emulators": "firebase emulators:start --only firestore --import=./emulator-data --export-on-exit=./emulator-data",
+    "emulators": "firebase emulators:start --only firestore --project=pricevprice-00 --import=./emulator-data --export-on-exit=./emulator-data",
     "emulators:export": "firebase emulators:export ./emulator-data"
   },
   "keywords": [],

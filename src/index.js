@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import { tap, from, defer, of, map, catchError } from 'rxjs';
 import { db } from './config/firebase.js';
 
 const app = express();
@@ -14,6 +15,25 @@ app.get('/health', async (req, res) => {
     status: 'ok',
     emulatorHost: process.env.FIRESTORE_EMULATOR_HOST || 'Live Production',
   });
+});
+
+// Create SKU Route (RxJS)
+app.post('/api/skus', (req, res) => {
+  const { id, title, price } = req.body;
+  const skuData = {title, price, createdAt: new Date().toISOString()};
+
+  defer(() => from(db.collection('skus').doc(id).set(skuData)))
+    .pipe(
+			tap(_ => console.log('Saving to the Emulator')),
+      map(() => ({
+        status: 201,
+        body: { success: true, message: `Document ${id} created.` }
+      })),
+      catchError((error) => of({
+        status: 500,
+        body: { success: false, error: error.message }
+      }))
+    ).subscribe(({ status, body }) => res.status(status).json(body));
 });
 
 app.listen(PORT, () => {
