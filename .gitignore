@@ -15,6 +15,7 @@ lerna-debug.log*
 
 # Firebase
 .firebase/
+emulator-data/
 firebase-debug.log
 ui-debug.log
 
