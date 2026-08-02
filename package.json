@@ -9,13 +9,14 @@
     "emulators": "firebase emulators:start --only firestore"
   },
   "keywords": [],
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@google/genai": "^2.15.0",
     "apify-client": "^2.24.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "firebase-admin": "^14.2.0",
+    "rxjs": "^7.8.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
