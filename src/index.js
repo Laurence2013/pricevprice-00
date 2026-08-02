@@ -16,7 +16,6 @@ app.get('/health', async (req, res) => {
     emulatorHost: process.env.FIRESTORE_EMULATOR_HOST || 'Live Production',
   });
 });
-// Create SKU Route (RxJS)
 app.post('/api/skus', (req, res) => {
   const { title, price } = req.body;
   const skuData = { title, price, createdAt: new Date().toISOString() };
@@ -35,7 +34,6 @@ app.post('/api/skus', (req, res) => {
 			body: { success: false, error: error.message }
 		}))).subscribe(({ status, body }) => res.status(status).json(body));
 });
-// 2. READ (GET /api/skus/:id - RxJS)
 app.get('/api/skus/:id', (req, res) => {
   const { id } = req.params;
 
@@ -48,6 +46,16 @@ app.get('/api/skus/:id', (req, res) => {
 		}),
 		catchError((error) => of({status: 500, body: { success: false, error: error.message }}))
   ).subscribe(({ status, body }) => res.status(status).json(body));
+});
+// UPDATE (PATCH /api/skus/:id - RxJS)
+app.patch('/api/skus/:id', (req, res) => {
+  const { id } = req.params;
+  const updateData = {...req.body, updatedAt: new Date().toISOString()};
+
+  defer(() => from(db.collection('skus').doc(id).update(updateData))).pipe(
+		map(() => ({status: 200, body: { success: true, message: `Document ${id} updated.` }})),
+		catchError((error) => of({status: 500,body: { success: false, error: error.message }}))
+	).subscribe(({ status, body }) => res.status(status).json(body));
 });
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
