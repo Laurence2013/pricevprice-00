@@ -5,6 +5,12 @@ const apifyClient = new ApifyClient({
   token: process.env.APIFY_TOKEN
 });
 
+export const PLATFORM_ACTORS = {
+  ebayScraper: 'automation-lab/ebay-scraper',
+  vintedScraper: 'epicscrapers/vinted-search-scraper',
+  default: 'apify/web-scraper'
+};
+
 export const runApifyActor$ = (actorId = 'apify/web-scraper', input = {}) => {
   return defer(() => from(apifyClient.actor(actorId).call(input))).pipe(
     map((run) => ({

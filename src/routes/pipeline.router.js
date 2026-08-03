@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { switchMap, map, catchError, of } from 'rxjs';
-import { runApifyActor$, getApifyDatasetItems$ } from '../services/apify.service.js';
+import { runApifyActor$, getApifyDatasetItems$, PLATFORM_ACTORS } from '../services/apify.service.js';
 import { extractProductData$, summarizeMarketTrends$ } from '../services/gemini.service.js';
 import { db } from '../config/firebase.js';
 import { scrapeRequestSchema, geminiExtractionSchema, pipelineRequestSchema } from '../utils/schemas.js';
 
 const router = Router();
 
-// POST /api/pipeline/scrape - Trigger Apify scraping actor and get results
+// POST /api/pipeline/scrape - Universal Apify Web Scraper Endpoint
 router.post('/scrape', (req, res) => {
   const validation = scrapeRequestSchema.safeParse(req.body);
   if (!validation.success) {
@@ -16,10 +16,9 @@ router.post('/scrape', (req, res) => {
       errors: validation.error.flatten().fieldErrors
     });
   }
-  const actorId00 = 'apify/web-scraper';
-  const actorId01 = 'automation-lab/ebay-scraper';
 
-  const actorId = validation.data.actorId || actorId01;
+  const platform = validation.data.platform || 'ebayScraper';
+  const actorId = validation.data.actorId || PLATFORM_ACTORS[platform] || PLATFORM_ACTORS.default;
   const input = validation.data.runInput || (validation.data.url ? { startUrls: [{ url: validation.data.url }] } : {});
 
   runApifyActor$(actorId, input).pipe(
@@ -32,6 +31,8 @@ router.post('/scrape', (req, res) => {
           status: 200,
           body: {
             success: true,
+            platform,
+            actorId,
             runId: runResult.runId,
             items: itemsResult.items,
             total: itemsResult.total

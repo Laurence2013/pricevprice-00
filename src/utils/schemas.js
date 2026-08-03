@@ -17,6 +17,7 @@ export const skuUpdateSchema = z.object({
 }).passthrough();
 
 export const scrapeRequestSchema = z.object({
+  platform: z.string().optional().default('ebay'),
   url: z.string().url('Invalid URL provided').optional(),
   actorId: z.string().optional(),
   runInput: z.record(z.any()).optional()
