@@ -8,6 +8,8 @@ const apifyClient = new ApifyClient({
 export const PLATFORM_ACTORS = {
   ebayScraper: 'automation-lab/ebay-scraper',
   vintedScraper: 'epicscrapers/vinted-search-scraper',
+	googleShoppingScraper: 'automation-lab/google-shopping-scraper',
+	fbMarketplaceScraper: 'apify/facebook-marketplace-scraper',
   default: 'apify/web-scraper'
 };
 
