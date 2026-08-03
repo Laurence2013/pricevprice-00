@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { switchMap, map, catchError, of } from 'rxjs';
 import { runApifyActor$, getApifyDatasetItems$, PLATFORM_ACTORS } from '../services/apify.service.js';
 import { extractProductData$, summarizeMarketTrends$ } from '../services/gemini.service.js';
+import { saveScrapedProducts$ } from '../services/firestore.service.js';
 import { db } from '../config/firebase.js';
 import { scrapeRequestSchema, geminiExtractionSchema, pipelineRequestSchema } from '../utils/schemas.js';
 
@@ -26,14 +27,20 @@ router.post('/scrape', (req, res) => {
       if (!runResult.success) {
         return of({ status: 500, body: runResult });
       }
-      return getApifyDatasetItems$(runResult.defaultDatasetId).pipe(
-        map((itemsResult) => ({
+      return getApifyDatasetItems$(runResult.defaultDatasetId);
+    }),
+    switchMap((itemsResult) => {
+      if (!itemsResult.success) {
+        return of({ status: 500, body: itemsResult });
+      }
+      return saveScrapedProducts$(itemsResult.items, platform).pipe(
+        map((dbResult) => ({
           status: 200,
           body: {
             success: true,
             platform,
             actorId,
-            runId: runResult.runId,
+            savedCount: dbResult.savedCount,
             items: itemsResult.items,
             total: itemsResult.total
           }
