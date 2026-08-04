@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { defer, from, map, catchError, of } from 'rxjs';
+import { loadPromptTemplate } from '../utils/prompt-loader.js';
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
@@ -28,7 +29,8 @@ export const extractProductData$ = (prompt, textContent = '', model = 'gemini-3.
 };
 
 export const summarizeMarketTrends$ = (items = [], model = 'gemini-3.6-flash') => {
-  const prompt = `Analyze the following reseller market data items and summarize key trends, average price point, and resell potential:\n\n${JSON.stringify(items, null, 2)}`;
+  // Load prompt template from prompts/summarizeMarketTrends.prompt
+  const prompt = loadPromptTemplate('summarizeMarketTrends.prompt', { items });
 
   return extractProductData$(prompt, '', model);
 };

@@ -1,0 +1,4 @@
+---
+model: googleai/gemini-3.6-flash
+---
+Analyze reseller market trends and resale potential for "{{productName}}". Data: {{json marketData}}

@@ -40,3 +40,49 @@ export const saveScrapedProducts$ = (items = [], platform = 'ebay', collectionNa
     catchError((error) => of({ success: false, error: error.message }))
   );
 };
+
+/**
+ * Fetches products from a specified Firestore collection or scraped_products.
+ * @param {string} collectionName - Target Firestore collection
+ * @param {number} limitCount - Max items to retrieve
+ * @returns {Observable<{success: boolean, items: Array, error?: string}>}
+ */
+export const getProductsFromCollection$ = (collectionName = 'scraped_products', limitCount = 50) => {
+  return defer(() =>
+    from(
+      db.collection(collectionName).limit(limitCount).get()
+    )
+  ).pipe(
+    map((snapshot) => {
+      const items = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() });
+      });
+      return { success: true, items };
+    }),
+    catchError((error) => of({ success: false, items: [], error: error.message }))
+  );
+};
+
+/**
+ * Saves a reseller AI analysis result into Firestore collection 'reseller_analyses'
+ * @param {Object} record - Analysis record object containing query, result, platforms
+ * @returns {Observable<{success: boolean, id?: string, error?: string}>}
+ */
+export const saveResellerAnalysis$ = (record) => {
+  const dataToSave = {
+    ...record,
+    createdAt: new Date().toISOString()
+  };
+
+  return defer(() =>
+    from(db.collection('reseller_analyses').add(dataToSave))
+  ).pipe(
+    map((docRef) => ({
+      success: true,
+      id: docRef.id,
+      savedRecord: dataToSave
+    })),
+    catchError((error) => of({ success: false, error: error.message }))
+  );
+};

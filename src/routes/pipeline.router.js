@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { switchMap, map, catchError, of } from 'rxjs';
 import { runApifyActor$, getApifyDatasetItems$, PLATFORM_ACTORS } from '../services/apify.service.js';
 import { extractProductData$, summarizeMarketTrends$ } from '../services/gemini.service.js';
-import { saveScrapedProducts$ } from '../services/firestore.service.js';
+import { saveScrapedProducts$, getProductsFromCollection$, saveResellerAnalysis$ } from '../services/firestore.service.js';
+import { runQuerySearchAnalysisFlow$ } from '../services/genkit.service.js';
 import { db } from '../config/firebase.js';
 import { scrapeRequestSchema, geminiExtractionSchema, pipelineRequestSchema } from '../utils/schemas.js';
 
@@ -69,6 +70,64 @@ router.post('/analyze', (req, res) => {
         return { status: 500, body: aiResult };
       }
       return { status: 200, body: aiResult };
+    }),
+    catchError((error) => of({ status: 500, body: { success: false, error: error.message } }))
+  ).subscribe(({ status, body }) => res.status(status).json(body));
+});
+
+// POST /api/pipeline/search-query - Natural Language AI Reseller Search & Firestore Persistence
+router.post('/search-query', (req, res) => {
+  const { query, customDocuments, collectionName } = req.body;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      error: 'query string is required (e.g., "Is there a second hand PS4 in Vinted, and eBay for under £400 refurbished?")'
+    });
+  }
+
+  // Step 1: Fetch documents from Firestore collection or use provided customDocuments
+  const fetchDocs$ = customDocuments && Array.isArray(customDocuments)
+    ? of({ success: true, items: customDocuments })
+    : getProductsFromCollection$(collectionName || 'scraped_products', 50);
+
+  fetchDocs$.pipe(
+    switchMap((docsResult) => {
+      const documents = docsResult.items || [];
+      // Step 2: Run Genkit AI Flow with prompt + documents context
+      return runQuerySearchAnalysisFlow$({ query, documents }).pipe(
+        map((genkitResult) => ({ documents, genkitResult }))
+      );
+    }),
+    switchMap(({ documents, genkitResult }) => {
+      if (!genkitResult.success) {
+        return of({ status: 500, body: genkitResult });
+      }
+
+      const analysisData = genkitResult.data;
+      const recordToSave = {
+        query,
+        verdict: analysisData.verdict,
+        answerText: analysisData.answer,
+        matchedItemsCount: documents.length,
+        contextCollection: collectionName || 'scraped_products'
+      };
+
+      // Step 3: Persist analysis into Firestore 'reseller_analyses'
+      return saveResellerAnalysis$(recordToSave).pipe(
+        map((saveResult) => ({
+          status: 200,
+          body: {
+            success: true,
+            savedAnalysisId: saveResult.id,
+            query,
+            verdict: analysisData.verdict,
+            answer: analysisData.answer,
+            matchedItemsCount: documents.length,
+            savedRecord: saveResult.savedRecord
+          }
+        }))
+      );
     }),
     catchError((error) => of({ status: 500, body: { success: false, error: error.message } }))
   ).subscribe(({ status, body }) => res.status(status).json(body));

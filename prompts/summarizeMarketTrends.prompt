@@ -1,0 +1,6 @@
+---
+model: googleai/gemini-3.6-flash
+---
+Analyze the following reseller market data items and summarize key trends, average price point, and resell potential:
+
+{{json items}}
