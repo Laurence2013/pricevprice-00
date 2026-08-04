@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY
 });
 
-export const extractProductData$ = (prompt, textContent = '', model = 'gemini-2.5-flash') => {
+export const extractProductData$ = (prompt, textContent = '', model = 'gemini-3.6-flash') => {
   const fullPrompt = textContent
     ? `${prompt}\n\nContext Data:\n${textContent}`
     : prompt;
@@ -27,7 +27,7 @@ export const extractProductData$ = (prompt, textContent = '', model = 'gemini-2.
   );
 };
 
-export const summarizeMarketTrends$ = (items = [], model = 'gemini-2.5-flash') => {
+export const summarizeMarketTrends$ = (items = [], model = 'gemini-3.6-flash') => {
   const prompt = `Analyze the following reseller market data items and summarize key trends, average price point, and resell potential:\n\n${JSON.stringify(items, null, 2)}`;
 
   return extractProductData$(prompt, '', model);

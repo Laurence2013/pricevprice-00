@@ -6,21 +6,26 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch --env-file-if-exists=.env src/index.js",
+    "genkit:start": "genkit start -- node --watch --env-file-if-exists=.env src/index.js",
     "emulators": "firebase emulators:start --only firestore --project=pricevprice-00 --import=./emulator-data --export-on-exit=./emulator-data",
     "emulators:export": "firebase emulators:export ./emulator-data"
   },
   "keywords": [],
   "type": "module",
   "dependencies": {
+    "@genkit-ai/express": "^1.40.1",
+    "@genkit-ai/google-genai": "^1.40.1",
     "@google/genai": "^2.15.0",
     "apify-client": "^2.24.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "firebase-admin": "^14.2.0",
+    "genkit": "^1.40.1",
     "rxjs": "^7.8.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "firebase-tools": "^15.25.1"
+    "firebase-tools": "^15.25.1",
+    "genkit-cli": "^1.40.1"
   }
 }

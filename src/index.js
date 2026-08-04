@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import skusRouter from './routes/skus.router.js';
 import pipelineRouter from './routes/pipeline.router.js';
+import genkitRouter from './routes/genkit.router.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ app.get('/health', (req, res) => {
 // Modular Routers
 app.use('/api/skus', skusRouter);
 app.use('/api/pipeline', pipelineRouter);
+app.use('/api/genkit', genkitRouter);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
