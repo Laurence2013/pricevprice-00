@@ -1,23 +1,41 @@
 # Dependencies
 node_modules/
+frontend/node_modules/
 
-# Environment variables
+# Angular Build & Cache
+.angular/
+frontend/.angular/
+frontend/dist/
+dist/
+
+# Genkit & AI Cache
+.genkit/
+*.genkit/
+
+# Environment variables & secrets
 .env
 .env*.local
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
 
 # Firebase
 .firebase/
 emulator-data/
 firebase-debug.log
+firestore-debug.log
 ui-debug.log
+
+# Logs & Temporary Files
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+scratch_*.js
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
 
 # Operating System Files
 .DS_Store

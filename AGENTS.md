@@ -19,6 +19,11 @@
   - Send Express HTTP responses inside `.subscribe(({ status, body }) => res.status(status).json(body))`.
   - Always handle errors with `catchError` returning fallback error states.
 
+### Frontend Architecture & State Management (Angular)
+- **Frontend Framework**: The frontend user interface MUST be built using the **Angular** framework.
+- **RxJS Integration**: All Angular services communicating with the backend API and connecting to Firebase MUST utilize **RxJS** observables and reactive streams.
+- **UI State Management**: All UI components MUST utilize **Angular Signals** (`signal()`, `computed()`, `effect()`, `toSignal()`) for managing component state and template reactivity.
+
 ### AI & External API Integrations
 - **AI Frameworks & Integrations**:
   - **Google AI Studio**: Generative AI workflows, summarization, and data extraction via `@google/genai`.
